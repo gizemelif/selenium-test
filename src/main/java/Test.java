@@ -1,30 +1,30 @@
 import org.openqa.selenium.*;
+import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.*;
 import java.util.*;
 
 public class Test {
     public static void main(String[] args) throws IOException, InterruptedException {
-        FirefoxDriver firefoxDriver = new FirefoxDriver();
-        WebDriverWait wait = new WebDriverWait(firefoxDriver, 30);
+        System.setProperty("webdriver.chrome.driver","C:\\Users\\geatalay\\Desktop\\chromedriver.exe");
+        ChromeDriver chromeDriver = new ChromeDriver();
+        WebDriverWait wait = new WebDriverWait(chromeDriver, 30);
 
-        firefoxDriver.navigate().to("https://ivd.gib.gov.tr/tvd_side/main.jsp?token=d1078f5e3dc646b78d5d4e5842f21e97feb48d366bc7617458b6679dec12675154a01fccc42292bb04d926bc259dbc75e39dd8e202535fd70a7098396c74a6f7");
+        chromeDriver.navigate().to("https://ivd.gib.gov.tr/tvd_side/main.jsp?token=d1078f5e3dc646b78d5d4e5842f21e97feb48d366bc7617458b6679dec12675154a01fccc42292bb04d926bc259dbc75e39dd8e202535fd70a7098396c74a6f7");
+        chromeDriver.manage().window().maximize();
         String verifyButtonXPath = "//*[@id=\"gen__1049\"]";
 
         wait.until(ExpectedConditions.elementToBeClickable(By.xpath(verifyButtonXPath)));
 
-        firefoxDriver.findElement(By.xpath(verifyButtonXPath)).click();
+        chromeDriver.findElement(By.xpath(verifyButtonXPath)).click();
 
         String searchText = "Vergi Kimlik Numarası Doğrulama";
-        WebElement dropdown = firefoxDriver.findElement(By.id("gen__1119"));
+        WebElement dropdown = chromeDriver.findElement(By.id("gen__1120"));
         dropdown.click(); // assuming you have to click the "dropdown" to open it
         List<WebElement> dropList = dropdown.findElements(By.tagName("li"));
             for (WebElement list : dropList) {
@@ -34,66 +34,55 @@ public class Test {
             }
         }
 
-        ReadExcel readExcel = new ReadExcel();
-
-        //vergi dairelerini dolaşıp foreach de click yapar.
-        WebElement vergiDaire = firefoxDriver.findElement(By.xpath("//*[@id=\"gen__1188\"]"));
-        vergiDaire.click();
-        List<WebElement> vDaireElements = vergiDaire.findElements(By.tagName("option"));
-        vDaireElements.remove(0);
-
-        List<String> vergiNo = readExcel.readExcel();
-
-        for(WebElement d : vDaireElements){
-            WebElement element_enter = firefoxDriver.findElement(By.xpath("//*[@id=\"gen__1185\"]"));
-            element_enter.click();
-            element_enter.sendKeys(Keys.HOME+vergiNo.get(0));
-            Thread.sleep(2000);
-
-            selectState(firefoxDriver);
-            Thread.sleep(2000);
-
-            d.click();
-            Thread.sleep(3000);
 
 
 
-            //en son tıklanan DOĞRULA butonuna click özelliği verir
-            WebElement button = firefoxDriver.findElement(By.id("gen__1190"));
-            button.click();
 
-            String faal = "-----";
-            WebElement tab = firefoxDriver.findElement(By.id("gen__2240"));
+            Select s = new Select(chromeDriver.findElement(By.id("gen__1187")));
 
-            if(tab.getText().equals(faal)){
-                Thread.sleep(6000);
-                WebElement backBtn = firefoxDriver.findElement(By.id("gen__2246"));
-                backBtn.click();
+            s.selectByValue("038");
 
+            ReadExcel readExcel = new ReadExcel();
 
+            for(int i = 0; i < 8; i++){
+                WebElement element_enter = chromeDriver.findElement(By.xpath("//*[@id=\"gen__1185\"]"));
+                element_enter.click();
+
+                List<String> vergiNo = readExcel.readExcel();
+                element_enter.sendKeys(Keys.HOME+vergiNo.get(i));
+                Thread.sleep(2000);
+
+                for(int k = 1; k < 19; k++){
+                    Thread.sleep(1000);
+
+                    Select select = new Select(chromeDriver.findElement(By.id("gen__1188")));
+                    select.selectByIndex(k);
+
+                    //vDaireElements.get(k).click();
+                    Thread.sleep(3000);
+
+                    //en son tıklanan DOĞRULA butonuna click özelliği verir
+                    WebElement button = chromeDriver.findElement(By.id("gen__1190"));
+                    button.click();
+
+                    try{
+                        Thread.sleep(3000);
+                        WebElement goBackbtn = chromeDriver.findElement(By.cssSelector("#gen__1179 > div.csc-tab-buttons-section.top-buttons > div.csc-tab-buttons-container > ul > li:nth-child(1) > span"));
+                        goBackbtn.click();
+
+                    }catch (Exception e){
+                        // csc-msgbox-msg-span
+                        String mesaj = "GİRDİĞİNİZ BİLGİLERDE HATA VARDIR. KONTROL EDEREK TEKRAR DENEYEBİLİRSİNİZ";
+                        WebElement msgbox = chromeDriver.findElement(By.cssSelector("#runtime-body > div.cs-popup-window.project-css.tvd-css.adminTrend.cs-popup-msg-box > div.cs-popup-content > div > table > tbody > tr > td > span"));
+
+                        if(msgbox.getText().equals(mesaj)){
+                            chromeDriver.findElement(By.cssSelector("#runtime-body > div.cs-popup-window.project-css.tvd-css.adminTrend.cs-popup-msg-box > div.cs-popup-content > div > div > div > input")).click();
+                        }
+                    }
+
+                }
             }
-
-            System.out.println(readExcel.readExcel()+"\t"+vDaireElements.get(0).getText()+"\t"+tab.getText());
-        }
-
     }
-    public static void selectState(FirefoxDriver driver, String state) throws InterruptedException {
-        //String text = "";
-        WebElement comboBox = driver.findElement(By.id("gen__1187"));
-        comboBox.click();
-        List<WebElement> states = comboBox.findElements(By.tagName("option"));
-        states.remove(0);
-
-        for(WebElement s : states){
-            state = s.getText();
-            s.click();
-
-
-
-            Thread.sleep(5000);
-        }
-    }
-
-
 }
+
 

@@ -15,10 +15,6 @@ import java.util.List;
 public class ReadExcel {
     private String vNo;
 
-    public ReadExcel() {
-        this.vNo = vNo;
-    }
-
     public String getvNo() {
         return vNo;
     }
