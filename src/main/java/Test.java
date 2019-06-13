@@ -34,23 +34,24 @@ public class Test {
             }
         }
 
-
-
-
-
             Select s = new Select(chromeDriver.findElement(By.id("gen__1187")));
 
             s.selectByValue("038");
 
             ReadExcel readExcel = new ReadExcel();
+            List<String> vergiNo = readExcel.readExcel();
+            vergiNo.listIterator().next();
 
-            for(int i = 0; i < 8; i++){
-                WebElement element_enter = chromeDriver.findElement(By.xpath("//*[@id=\"gen__1185\"]"));
+        label1:
+            for(String v : vergiNo){
+                WebElement element_enter = chromeDriver.findElement(By.id("gen__1185"));
                 element_enter.click();
 
-                List<String> vergiNo = readExcel.readExcel();
-                element_enter.sendKeys(Keys.HOME+vergiNo.get(i));
                 Thread.sleep(2000);
+                element_enter.sendKeys(Keys.HOME+v);
+
+                Thread.sleep(1000);
+
 
                 for(int k = 1; k < 19; k++){
                     Thread.sleep(1000);
@@ -59,29 +60,37 @@ public class Test {
                     select.selectByIndex(k);
 
                     //vDaireElements.get(k).click();
-                    Thread.sleep(3000);
+                    Thread.sleep(2000);
 
                     //en son tıklanan DOĞRULA butonuna click özelliği verir
                     WebElement button = chromeDriver.findElement(By.id("gen__1190"));
                     button.click();
 
                     try{
-                        Thread.sleep(3000);
-                        WebElement goBackbtn = chromeDriver.findElement(By.cssSelector("#gen__1179 > div.csc-tab-buttons-section.top-buttons > div.csc-tab-buttons-container > ul > li:nth-child(1) > span"));
-                        goBackbtn.click();
+                        Thread.sleep(1000);
+                        WebElement closeTab = chromeDriver.findElement(By.cssSelector(".csc-tab-close"));
+
+
+                        wait.until(ExpectedConditions.elementToBeClickable(closeTab));
+                        closeTab.click();
+                        //WebElement goBackbtn = chromeDriver.findElement(By.cssSelector("#gen__1179 > div.csc-tab-buttons-section.top-buttons > div.csc-tab-buttons-container > ul > li:nth-child(1) > span"));
+
+                       // WebElement goBackbtn = chromeDriver.findElement(By.cssSelector("input[value=\"GERİ DÖN\"]"));
+                        //goBackbtn.click();
 
                     }catch (Exception e){
-                        // csc-msgbox-msg-span
-                        String mesaj = "GİRDİĞİNİZ BİLGİLERDE HATA VARDIR. KONTROL EDEREK TEKRAR DENEYEBİLİRSİNİZ";
-                        WebElement msgbox = chromeDriver.findElement(By.cssSelector("#runtime-body > div.cs-popup-window.project-css.tvd-css.adminTrend.cs-popup-msg-box > div.cs-popup-content > div > table > tbody > tr > td > span"));
+                        e.printStackTrace();
+                        Thread.sleep(3000);
+                        chromeDriver.findElement(By.cssSelector("#runtime-body > div.cs-popup-window.project-css.tvd-css.adminTrend.cs-popup-msg-box > div.cs-popup-content > div > div > div > input")).click();
 
-                        if(msgbox.getText().equals(mesaj)){
-                            chromeDriver.findElement(By.cssSelector("#runtime-body > div.cs-popup-window.project-css.tvd-css.adminTrend.cs-popup-msg-box > div.cs-popup-content > div > div > div > input")).click();
-                        }
+                        continue label1;
+
                     }
+
 
                 }
             }
+
     }
 }
 

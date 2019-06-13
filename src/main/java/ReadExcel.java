@@ -24,7 +24,7 @@ public class ReadExcel {
     }
 
     public List<String> readExcel() throws IOException {
-        File excelFile = new File("C:\\Users\\geatalay\\Desktop\\Vergi_numarası_kontrol\\Kayseri_Haftasonu.xlsx");
+        File excelFile = new File("C:\\Users\\geatalay\\Desktop\\Vergi_numarası_kontrol\\vergi_no_kayseri.xlsx");
         FileInputStream fis = new FileInputStream(excelFile);
 
         List<String> vNoList = Lists.newArrayList();
@@ -34,9 +34,9 @@ public class ReadExcel {
         // we iterate on rows
         Iterator<Row> rowIt = sheet.iterator();
 
-        if (rowIt.hasNext()) {
+        /*if (rowIt.hasNext()) {
             rowIt.next();
-        }
+        }*/
         while (rowIt.hasNext()) {
             Row row = rowIt.next();
 
@@ -45,13 +45,15 @@ public class ReadExcel {
 
             while (cellIterator.hasNext()) {
                 Cell cell1 = cellIterator.next();
+                cell1.setCellType(CellType.STRING);
 
                 if (cell1 == null) {
                     continue;
-                } else if (cell1.getCellTypeEnum() == CellType.STRING) {
+                }else if(cell1.getStringCellValue().length() != 10){
+                    continue;
+                }
+                else{
                     this.vNo = cell1.getStringCellValue();
-                } else if (cell1.getCellTypeEnum() == CellType.NUMERIC) {
-                    this.vNo = String.valueOf(cell1.getNumericCellValue());
                 }
                 System.out.println("Vergi numarası: "+this.vNo);
             }
