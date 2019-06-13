@@ -56,6 +56,8 @@ public class ReadExcel {
                     this.vNo = cell1.getStringCellValue();
                 }
                 System.out.println("Vergi numarası: "+this.vNo);
+                System.out.println("Vergi numarası: " + new Long(new Double(cell1.getNumericCellValue()).longValue()).toString());
+
             }
             vNoList.add(this.vNo);
         }
